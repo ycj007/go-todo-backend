@@ -1,6 +1,7 @@
 // Package postgres wraps postgres (pq) driver as an adapter for REL.
 //
 // Usage:
+//
 //	// open postgres connection.
 //	adapter, err := postgres.Open("postgres://postgres@localhost/rel_test?sslmode=disable")
 //	if err != nil {
@@ -30,7 +31,7 @@ type Postgres struct {
 // New postgres adapter using existing connection.
 func New(database *db.DB) rel.Adapter {
 	var (
-		bufferFactory     = builder.BufferFactory{ArgumentPlaceholder: "$", ArgumentOrdinal: true, BoolTrueValue: "true", BoolFalseValue: "false", Quoter: Quote{}, ValueConverter: ValueConvert{}}
+		bufferFactory     = builder.BufferFactory{AllowTableSchema: true, ArgumentPlaceholder: "$", ArgumentOrdinal: true, BoolTrueValue: "true", BoolFalseValue: "false", Quoter: Quote{}, ValueConverter: ValueConvert{}}
 		filterBuilder     = builder.Filter{}
 		queryBuilder      = builder.Query{BufferFactory: bufferFactory, Filter: filterBuilder}
 		OnConflictBuilder = builder.OnConflict{Statement: "ON CONFLICT", IgnoreStatement: "DO NOTHING", UpdateStatement: "DO UPDATE SET", TableQualifier: "excluded", SupportKey: true}
@@ -40,7 +41,7 @@ func New(database *db.DB) rel.Adapter {
 		deleteBuilder     = builder.Delete{BufferFactory: bufferFactory, Query: queryBuilder, Filter: filterBuilder}
 		ddlBufferFactory  = builder.BufferFactory{InlineValues: true, BoolTrueValue: "true", BoolFalseValue: "false", Quoter: Quote{}, ValueConverter: ValueConvert{}}
 		ddlQueryBuilder   = builder.Query{BufferFactory: ddlBufferFactory, Filter: filterBuilder}
-		tableBuilder      = builder.Table{BufferFactory: ddlBufferFactory, ColumnMapper: columnMapper}
+		tableBuilder      = builder.Table{BufferFactory: ddlBufferFactory, ColumnMapper: columnMapper, DropKeyMapper: sql.DropKeyMapper}
 		indexBuilder      = builder.Index{BufferFactory: ddlBufferFactory, Query: ddlQueryBuilder, Filter: filterBuilder, SupportFilter: true}
 	)
 
@@ -61,13 +62,13 @@ func New(database *db.DB) rel.Adapter {
 
 // Open postgres connection using dsn.
 func Open(dsn string) (rel.Adapter, error) {
-	var database, err = db.Open("postgres", dsn)
+	database, err := db.Open("postgres", dsn)
 	return New(database), err
 }
 
 // MustOpen postgres connection using dsn.
 func MustOpen(dsn string) rel.Adapter {
-	var database, err = db.Open("postgres", dsn)
+	database, err := db.Open("postgres", dsn)
 	check(err)
 	return New(database)
 }
@@ -110,9 +111,7 @@ func (p Postgres) InsertAll(ctx context.Context, query rel.Query, primaryField s
 
 // Begin begins a new transaction.
 func (p Postgres) Begin(ctx context.Context) (rel.Adapter, error) {
-	var (
-		txSql, err = p.SQL.Begin(ctx)
-	)
+	txSql, err := p.SQL.Begin(ctx)
 
 	return &Postgres{SQL: *txSql.(*sql.SQL)}, err
 }

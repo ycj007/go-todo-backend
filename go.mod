@@ -4,18 +4,18 @@ go 1.19
 
 require (
 	github.com/go-chi/chi v4.1.2+incompatible
-	github.com/go-rel/postgres v0.8.0
-	github.com/go-rel/rel v0.39.0
+	github.com/go-rel/postgres v0.11.0
+	github.com/go-rel/rel v0.41.0
 	github.com/go-rel/reltest v0.11.0
 	github.com/goware/cors v1.1.1
 	github.com/lib/pq v1.10.9
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.24.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-rel/sql v0.12.0 // indirect
+	github.com/go-rel/sql v0.16.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/serenize/snaker v0.0.0-20201027110005-a7ad2135616e // indirect
